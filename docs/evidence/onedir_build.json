@@ -1,0 +1,11 @@
+{
+  "created_utc": "2026-10-31T07:47:30.7501888Z",
+  "artifact": "dist\\current\\Task1CodeAgent\\Task1CodeAgent.exe",
+  "bundle": "onedir",
+  "sha256": "77157fabbd1fb35085c2471c9349505ed42bf41a6aef11b14f466bb0b7863846",
+  "bytes": 2957365,
+  "pyinstaller": "6.22.3",
+  "smoke_status": "offline_verified",
+  "clean_machine_validation": "pending",
+  "live_generation": "not tested by this build"
+}

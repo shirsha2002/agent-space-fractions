@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-10-30T18:01:11.484141+00:00",
+  "exit_code": 0,
+  "status": "offline_verified",
+  "tkinter_runtime": "passed",
+  "independent_of_python_path": true,
+  "environment": "PATH limited to Windows System32; Python/Conda environment variables excluded",
+  "path_case": "relocated standalone EXE in a directory containing spaces and Chinese characters",
+  "clean_windows_validation": "pending: this developer machine still has Python installed",
+  "paid_calls": 0,
+  "mock_repairs_used": 1
+}

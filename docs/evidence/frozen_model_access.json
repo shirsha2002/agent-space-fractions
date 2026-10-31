@@ -1,0 +1,10 @@
+{
+  "recorded_utc": "2026-10-31T07:55:08.104070+00:00",
+  "bundled_agent_official_model_access": true,
+  "endpoint": "GET https://api.deepseek.com/models",
+  "paid_chat_request": false,
+  "execution": "trusted local probe through the packaged runner, System32-only PATH",
+  "clean_windows_validation": "pending; developer machine",
+  "credentials_written_to_probe_source": false,
+  "agent_artifact_sha256": "492b95e8cfedf83b77071e74e040577592b9cd4dab42840664da4a9685b9bb32"
+}

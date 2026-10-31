@@ -1,0 +1,10 @@
+{
+  "ok": false,
+  "phase": "static",
+  "python_files": 5,
+  "errors": [
+    "tests/test_game.py:157: disallowed call os.rmdir",
+    "tests/test_game.py:156: disallowed call os.remove"
+  ],
+  "evidence_origin": "Recomputed from the preserved first-response manifest using the unchanged static checker; not an original timestamped validation log."
+}

@@ -1,0 +1,14 @@
+{
+  "revision": 2,
+  "reviewer": "Codex acting for the project owner",
+  "timestamp_utc": "2026-10-31T07:43:30.033411+00:00",
+  "reason": "Add explicitly operator-authored disposable-Tk regression checks for real generated-game callbacks, paused input, duplicate score persistence, admin denial, logout invalidation and authenticated admin edit persistence. No additional model calls.",
+  "files": [
+    {
+      "path": "tests/test_reviewed_ui.py",
+      "before_sha256": null,
+      "after_sha256": "ba6168edb6b3de9ef0a38605ca18066b92dc1ed7d4ff09ed2a66a2a3c3f795b7"
+    }
+  ],
+  "additional_model_calls": 0
+}

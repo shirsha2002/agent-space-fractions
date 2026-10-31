@@ -1,0 +1,13 @@
+﻿{
+    "recorded_utc":  "2026-10-31T07:51:30.2495357Z",
+    "artifact":  "dist/game/SpaceFractions.exe",
+    "sha256":  "9c705865dafc5a8643aac70dea9f50704dd4bf1bcc8dc7ccc0c890e76b4bb57f",
+    "standalone_startup_passed":  true,
+    "observed_window_title":  "Space Fractions",
+    "sqlite_created_in_disposable_profile":  true,
+    "path":  "Windows System32 only",
+    "python_environment":  "not inherited",
+    "clean_windows":  "not established; developer machine",
+    "manual_visual_check":  "pending",
+    "cleanup":  "own disposable test process terminated after observation"
+}

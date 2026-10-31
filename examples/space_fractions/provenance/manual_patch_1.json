@@ -1,0 +1,29 @@
+{
+  "revision": 1,
+  "reviewer": "Codex acting for the project owner",
+  "timestamp_utc": "2026-10-31T07:42:47.766567+00:00",
+  "reason": "Disclosed post-generation fixes after the two model repairs: correct one invalid test vector; enforce local session authorization and password reset rules; preserve text distractor editing; fix pause/keyboard lifecycle and intro timing/art; add regression coverage. Original DeepSeek manifests remain unchanged. No additional model calls.",
+  "files": [
+    {
+      "path": "storage.py",
+      "before_sha256": "df66f20175ab155eb5cc45565d612366f72a97524fb3452724d861f1ece4b528",
+      "after_sha256": "d684f073aa1be4b4a3218321a57cc210b40fad706070b2fef2e7c329854986e4"
+    },
+    {
+      "path": "game_gui.py",
+      "before_sha256": "b2ea9fdb0d4742e01cfb9ed4c87f5577540d582da2b5bf372b2e4862cbc0c864",
+      "after_sha256": "3207fcda1bdf8f5aafabe1c6a75e2567a7f5025b1d3d2706601b189eea631ee6"
+    },
+    {
+      "path": "tests/test_game.py",
+      "before_sha256": "fa29b182c9be126f38e8e80fe3ed082583646a3dca1a1791ddaaf99681842735",
+      "after_sha256": "6f99e52944b0b9dca12ba9d791b9f92ca389153ae41ecc16b54df2b738ef7c10"
+    },
+    {
+      "path": "README.md",
+      "before_sha256": "e904c9d25a4f80ad0f71804017d92fa632ce10b9dff096fd4ff1d2b1a2734f57",
+      "after_sha256": "3f53dd6a71a91906c4c173326b892dc6761ddf4d8929f3a47626fbfd9abe250c"
+    }
+  ],
+  "additional_model_calls": 0
+}

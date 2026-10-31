@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "verification_id": "20261031T075731Z_06e8bbc9",
+  "started_utc": "2026-10-31T07:57:31.4301195Z",
+  "completed_utc": "2026-10-31T07:57:35.7144912Z",
+  "windows_version": "Microsoft Windows NT 10.0.26300.0",
+  "operating_system_bitness": 64,
+  "artifact": {
+    "filename": "Task1CodeAgent.exe",
+    "bytes": 14471715,
+    "sha256": "492b95e8cfedf83b77071e74e040577592b9cd4dab42840664da4a9685b9bb32"
+  },
+  "inputs": [
+    {
+      "filename": "Architecture_Documentation.md",
+      "bytes": 10454,
+      "sha256": "111282df7817bca771e53c82ebb053707a3217cb8f11733a2c25b631ca81db55"
+    },
+    {
+      "filename": "Architecture_View.md",
+      "bytes": 4242,
+      "sha256": "77dac057e13f122ddc6fc19294490c6a961f00429b72f15df81a81adc91bdbc8"
+    }
+  ],
+  "overall_status": "offline_checks_passed",
+  "process_exit_code": 0,
+  "elapsed_seconds": 4.285,
+  "automated_diagnostic": {
+    "mode": "offline_mock",
+    "status": "offline_verified",
+    "tkinter_runtime": "passed",
+    "tests_ok": true,
+    "tests_run": 1
+  },
+  "clean_windows": {
+    "operator_asserted": false,
+    "assertion": "No clean-environment assertion was supplied.",
+    "independently_established": false,
+    "python_installation_inspection": "not performed; PATH is not evidence of installation state"
+  },
+  "manual_visual_validation": "pending",
+  "live_generation": "not performed; offline mock diagnostic only",
+  "errors": []
+}

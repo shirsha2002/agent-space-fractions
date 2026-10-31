@@ -1,0 +1,75 @@
+﻿{
+    "created_utc":  "2026-10-31T13:59:01.5497016Z",
+    "source_run_id":  "20261031T073223Z_f038d3d8",
+    "source_model":  "deepseek-v4-pro",
+    "source_origin":  "DeepSeek generation plus disclosed operator adjustments",
+    "manual_adjustments":  [
+                               {
+                                   "revision":  1,
+                                   "reviewer":  "Codex acting for the project owner",
+                                   "timestamp_utc":  "2026-10-31T07:42:47.766567+00:00",
+                                   "reason":  "Disclosed post-generation fixes after the two model repairs: correct one invalid test vector; enforce local session authorization and password reset rules; preserve text distractor editing; fix pause/keyboard lifecycle and intro timing/art; add regression coverage. Original DeepSeek manifests remain unchanged. No additional model calls.",
+                                   "files":  [
+                                                 {
+                                                     "path":  "storage.py",
+                                                     "before_sha256":  "df66f20175ab155eb5cc45565d612366f72a97524fb3452724d861f1ece4b528",
+                                                     "after_sha256":  "d684f073aa1be4b4a3218321a57cc210b40fad706070b2fef2e7c329854986e4"
+                                                 },
+                                                 {
+                                                     "path":  "game_gui.py",
+                                                     "before_sha256":  "b2ea9fdb0d4742e01cfb9ed4c87f5577540d582da2b5bf372b2e4862cbc0c864",
+                                                     "after_sha256":  "3207fcda1bdf8f5aafabe1c6a75e2567a7f5025b1d3d2706601b189eea631ee6"
+                                                 },
+                                                 {
+                                                     "path":  "tests/test_game.py",
+                                                     "before_sha256":  "fa29b182c9be126f38e8e80fe3ed082583646a3dca1a1791ddaaf99681842735",
+                                                     "after_sha256":  "6f99e52944b0b9dca12ba9d791b9f92ca389153ae41ecc16b54df2b738ef7c10"
+                                                 },
+                                                 {
+                                                     "path":  "README.md",
+                                                     "before_sha256":  "e904c9d25a4f80ad0f71804017d92fa632ce10b9dff096fd4ff1d2b1a2734f57",
+                                                     "after_sha256":  "3f53dd6a71a91906c4c173326b892dc6761ddf4d8929f3a47626fbfd9abe250c"
+                                                 }
+                                             ],
+                                   "additional_model_calls":  0
+                               },
+                               {
+                                   "revision":  2,
+                                   "reviewer":  "Codex acting for the project owner",
+                                   "timestamp_utc":  "2026-10-31T07:43:30.033411+00:00",
+                                   "reason":  "Add explicitly operator-authored disposable-Tk regression checks for real generated-game callbacks, paused input, duplicate score persistence, admin denial, logout invalidation and authenticated admin edit persistence. No additional model calls.",
+                                   "files":  [
+                                                 {
+                                                     "path":  "tests/test_reviewed_ui.py",
+                                                     "before_sha256":  null,
+                                                     "after_sha256":  "ba6168edb6b3de9ef0a38605ca18066b92dc1ed7d4ff09ed2a66a2a3c3f795b7"
+                                                 }
+                                             ],
+                                   "additional_model_calls":  0
+                               },
+                               {
+                                   "revision":  3,
+                                   "reviewer":  "Claude Code acting for the project owner",
+                                   "timestamp_utc":  "2026-10-31T13:58:20.901304+00:00",
+                                   "reason":  "Visual-only redesign requested by the owner: animated parallax starfield/nebula/meteor background (space_theme.py), styled cards and hover buttons, inline answer feedback with progress bar, animated rocket intro, DPI-aware rendering. Game rules, storage and authorization unchanged. No additional model calls.",
+                                   "files":  [
+                                                 {
+                                                     "path":  "game_gui.py",
+                                                     "before_sha256":  "3207fcda1bdf8f5aafabe1c6a75e2567a7f5025b1d3d2706601b189eea631ee6",
+                                                     "after_sha256":  "3351ebe2d343d709ad153f45c86a0583984b4cbfe9a736b4edb5197d48b30d96"
+                                                 },
+                                                 {
+                                                     "path":  "space_theme.py",
+                                                     "before_sha256":  null,
+                                                     "after_sha256":  "732a9397e4f38b7b634ca0eed26878e79c6a9c12a7208eea1fbf612eafc72e03"
+                                                 }
+                                             ],
+                                   "additional_model_calls":  0
+                               }
+                           ],
+    "artifact":  "dist\\game\\SpaceFractions.exe",
+    "sha256":  "3996bd7da442445a2c263d5ee1ecb5d461ea349a995f8a447c745f0a06fc584e",
+    "pyinstaller":  "6.22.3",
+    "clean_machine_validation":  "pending",
+    "manual_playthrough":  "pending"
+}

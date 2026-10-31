@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "run_id": "20261031T074754Z_e47d8e73",
+  "mode": "offline_mock",
+  "status": "offline_verified",
+  "model": "OFFLINE MOCK",
+  "started_at": "2026-10-31T07:47:54.357982+00:00",
+  "updated_at": "2026-10-31T07:47:55.983620+00:00",
+  "repairs_used": 1,
+  "max_repairs": 2,
+  "max_output_tokens": 16000,
+  "validation": {
+    "ok": true,
+    "phase": "test",
+    "errors": [],
+    "tests_run": 1,
+    "failures": 0,
+    "errors_count": 0,
+    "independent_contract": false,
+    "output": "test_marker (test_fixture.Diagnostic.test_marker) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+  },
+  "error": null,
+  "inputs": [
+    {
+      "name": "Architecture_Documentation.md",
+      "sha256": "111282df7817bca771e53c82ebb053707a3217cb8f11733a2c25b631ca81db55"
+    },
+    {
+      "name": "Architecture_View.md",
+      "sha256": "77dac057e13f122ddc6fc19294490c6a961f00429b72f15df81a81adc91bdbc8"
+    }
+  ],
+  "files": [
+    {
+      "path": "main.py",
+      "sha256": "5ef31bcb9433b939b92bc8c562528668b760b58dcdaa34e169144d2238786e6b"
+    },
+    {
+      "path": "game_core.py",
+      "sha256": "77446b90b78adcbe461b8609217a4da3cddd8d2e668a143e5c5715352058e829"
+    },
+    {
+      "path": "storage.py",
+      "sha256": "1f47ebd994a8855287afe1c8e511b0b02cc3c019794467e1c45371109dac6ef9"
+    },
+    {
+      "path": "requirements.txt",
+      "sha256": "0d5b8d9408d93e3953b2a0117a8a9657d829f2e95f79d904093bab5eec894183"
+    },
+    {
+      "path": "README.md",
+      "sha256": "3b53426faa2a260ae62cdc99bf989341e6a427fb59c8cb5a6617dcfaed83568e"
+    },
+    {
+      "path": "tests/test_fixture.py",
+      "sha256": "3625470b3b4ccc150b9c36be3ca2dfefdc1b3f29c0e0a7c0a197e013dab64770"
+    }
+  ],
+  "requests": [
+    {
+      "request_id": "offline-fixture",
+      "usage": {},
+      "model": "OFFLINE MOCK (no API)"
+    },
+    {
+      "request_id": "offline-fixture",
+      "usage": {},
+      "model": "OFFLINE MOCK (no API)"
+    }
+  ],
+  "budget": null,
+  "manual_adjustments": [],
+  "limitations": [
+    "Mocked diagnostic only: no real generation or game claim.",
+    "Separate process and static checks are not a security sandbox.",
+    "Cloud deployment/OAuth2 remain unimplemented in the desktop adaptation.",
+    "Clean Windows without Python must be tested separately."
+  ],
+  "tkinter_runtime": "passed"
+}

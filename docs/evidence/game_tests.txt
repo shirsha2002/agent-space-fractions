@@ -1,0 +1,53 @@
+test_empty_bank_rejected (independent_fraction_rules.IndependentFractionRules.test_empty_bank_rejected) ... ok
+test_exact_fraction_and_validation (independent_fraction_rules.IndependentFractionRules.test_exact_fraction_and_validation) ... ok
+test_no_skip_unanswered (independent_fraction_rules.IndependentFractionRules.test_no_skip_unanswered) ... ok
+test_score_once_and_states (independent_fraction_rules.IndependentFractionRules.test_score_once_and_states) ... ok
+test_game_initialization (test_game.TestGame.test_game_initialization) ... ok
+test_game_rejects_empty_questions (test_game.TestGame.test_game_rejects_empty_questions) ... ok
+test_next_question_last_sets_game_over (test_game.TestGame.test_next_question_last_sets_game_over) ... ok
+test_next_question_normal (test_game.TestGame.test_next_question_normal) ... ok
+test_next_question_paused_raises (test_game.TestGame.test_next_question_paused_raises) ... ok
+test_next_question_unanswered_raises (test_game.TestGame.test_next_question_unanswered_raises) ... ok
+test_pause_resume (test_game.TestGame.test_pause_resume) ... ok
+test_pause_when_not_playing_raises (test_game.TestGame.test_pause_when_not_playing_raises) ... ok
+test_restart (test_game.TestGame.test_restart) ... ok
+test_resume_when_not_paused_raises (test_game.TestGame.test_resume_when_not_paused_raises) ... ok
+test_submit_correct (test_game.TestGame.test_submit_correct) ... ok
+test_submit_duplicate_raises (test_game.TestGame.test_submit_duplicate_raises) ... ok
+test_submit_equivalent_fraction (test_game.TestGame.test_submit_equivalent_fraction) ... ok
+test_submit_game_over_raises (test_game.TestGame.test_submit_game_over_raises) ... ok
+test_submit_incorrect (test_game.TestGame.test_submit_incorrect) ... ok
+test_submit_paused_raises (test_game.TestGame.test_submit_paused_raises) ... ok
+test_check_equivalent_fractions (test_game.TestQuestion.test_check_equivalent_fractions) ... ok
+test_check_exact_match (test_game.TestQuestion.test_check_exact_match) ... ok
+test_check_invalid_input (test_game.TestQuestion.test_check_invalid_input) ... ok
+test_question_creation_invalid (test_game.TestQuestion.test_question_creation_invalid) ... ok
+test_question_creation_valid (test_game.TestQuestion.test_question_creation_valid) ... ok
+test_add_and_get_score (test_game.TestStorage.test_add_and_get_score) ... ok
+test_admin_password_setup_enables_login (test_game.TestStorage.test_admin_password_setup_enables_login) ... ok
+test_admin_unconfigured_cannot_login (test_game.TestStorage.test_admin_unconfigured_cannot_login) ... ok
+test_configured_admin_password_cannot_be_reset_without_login (test_game.TestStorage.test_configured_admin_password_cannot_be_reset_without_login) ... ok
+test_default_question_bank_is_valid (test_game.TestStorage.test_default_question_bank_is_valid)
+Ensure every default question has exactly one mathematically correct option. ... ok
+test_default_questions_seeded (test_game.TestStorage.test_default_questions_seeded) ... ok
+test_session_authorization_for_question_updates (test_game.TestStorage.test_session_authorization_for_question_updates) ... ok
+test_short_password_rejected (test_game.TestStorage.test_short_password_rejected) ... ok
+test_text_distractor_question_edit_persists (test_game.TestStorage.test_text_distractor_question_edit_persists) ... ok
+test_update_question (test_game.TestStorage.test_update_question) ... ok
+test_update_question_ambiguous_equivalent_options (test_game.TestStorage.test_update_question_ambiguous_equivalent_options) ... ok
+test_update_question_blank_prompt (test_game.TestStorage.test_update_question_blank_prompt) ... ok
+test_update_question_blank_qid (test_game.TestStorage.test_update_question_blank_qid) ... ok
+test_update_question_invalid_answer (test_game.TestStorage.test_update_question_invalid_answer) ... ok
+test_update_question_invalid_fraction (test_game.TestStorage.test_update_question_invalid_fraction) ... ok
+test_update_question_malformed_options (test_game.TestStorage.test_update_question_malformed_options) ... ok
+test_update_question_preserves_on_failure (test_game.TestStorage.test_update_question_preserves_on_failure) ... ok
+test_user_password_set_and_verify (test_game.TestStorage.test_user_password_set_and_verify) ... ok
+test_answer_pause_resume_keyboard_and_binding_lifecycle (test_reviewed_ui.ReviewedUIBehavior.test_answer_pause_resume_keyboard_and_binding_lifecycle) ... ok
+test_authenticated_admin_edit_through_dialog_persists (test_reviewed_ui.ReviewedUIBehavior.test_authenticated_admin_edit_through_dialog_persists) ... ok
+test_completed_game_is_saved_once_and_restart_resets_state (test_reviewed_ui.ReviewedUIBehavior.test_completed_game_is_saved_once_and_restart_resets_state) ... ok
+test_player_cannot_open_admin_and_logout_invalidates_session (test_reviewed_ui.ReviewedUIBehavior.test_player_cannot_open_admin_and_logout_invalidates_session) ... ok
+
+----------------------------------------------------------------------
+Ran 47 tests in 4.958s
+
+OK

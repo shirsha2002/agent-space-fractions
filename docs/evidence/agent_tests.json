@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-10-31T07:47:29.980555+00:00",
+  "command": "python -m unittest discover -s tests -v",
+  "python": "3.13.9",
+  "os": "Windows",
+  "tests_run": 56,
+  "exit_code": 0,
+  "passed": true,
+  "network": "mocked; no paid requests",
+  "clean_windows_validation": "pending",
+  "manual_visual_validation": "pending; desktop native helper unavailable"
+}

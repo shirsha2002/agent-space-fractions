@@ -1,0 +1,1071 @@
+{
+  "schema_version": 1,
+  "normalization": "Deterministic index with full original source text retained; not a complete semantic parser.",
+  "sources": [
+    {
+      "role": "architecture",
+      "name": "Architecture_Documentation.md",
+      "sha256": "111282df7817bca771e53c82ebb053707a3217cb8f11733a2c25b631ca81db55",
+      "bytes": 10454,
+      "text": "Analysis Plan:\r\nScope: Design a production-ready architectural documentation for the Space Fractions system.\r\nApproach: Align with the Requirements document and 11 PlantUML diagrams to create a comprehensive architecture.\r\nValidation: Verify that every FR/NFR/ASR is mapped in the traceability matrix and that all major components have API contracts and data schemas.\r\n\r\n# A. Executive Summary\r\nThe Space Fractions system is a web-based, interactive learning tool designed to improve fraction-solving skills for sixth-grade students. The system consists of an introductory movie, a main menu, a series of fraction questions, and an ending scene with feedback. The architecture will follow a microservices approach, with separate components for the game logic, question management, and user interface. The system will be deployed on a cloud-based infrastructure, ensuring scalability and availability.\r\n\r\nChosen architectural style: Microservices\r\nDeployment topology: Cloud-based infrastructure\r\n\r\nTop 3 design risks with concrete mitigations:\r\n\r\n| Risk | Mitigation |\r\n| --- | --- |\r\n| 1. Scalability issues | Implement load balancing and autoscaling |\r\n| 2. Security vulnerabilities | Implement encryption and secure authentication |\r\n| 3. Data loss | Implement regular backups and data replication |\r\n\r\nQA coverage mapping:\r\n\r\n| ASR/NFR ID | Test Type |\r\n| --- | --- |\r\n| ASR-1 (data durability) | Unit testing, Integration testing |\r\n| NFR-1 (performance) | Load testing, Stress testing |\r\n| ASR-2 (security) | Penetration testing, Vulnerability scanning |\r\n\r\n# B. Traceability & Rationale\r\nThe following table maps the requirements to the corresponding components and artifacts:\r\n\r\n| Requirement ID | Short Text | Diagram(s) | Component(s) | Artifact filename(s) | Rationale |\r\n| --- | --- | --- | --- | --- | --- |\r\n| FR-1 | Play game | UseCaseDiagram | GameComponent | openapi.yaml | Allows users to play the game |\r\n| NFR-1 | Performance | SequenceDiagram1 | GameComponent | internal.proto | Ensures the game responds quickly to user input |\r\n| ASR-1 | Data durability | DeploymentDiagram | QuestionComponent | sql/question_ddl.sql | Ensures that question data is persisted and recoverable |\r\n\r\n# C. Architecture Overview\r\nThe Space Fractions system consists of the following components:\r\n\r\n* GameComponent: responsible for game logic and user interaction\r\n* QuestionComponent: responsible for question management and data persistence\r\n* UserComponent: responsible for user authentication and authorization\r\n\r\nThe system follows a microservices architecture, with each component communicating with others through APIs.\r\n\r\n# D. Detailed Technical Design\r\n## GameComponent\r\n### Responsibilities & data ownership\r\nThe GameComponent is responsible for game logic and user interaction. It owns the game state data.\r\n\r\n### Technology options\r\n* Language/runtime: Node.js 18-20 (Justification: meets ASR-1 (data durability))\r\n* Web framework: Express.js 4-5 (Justification: meets NFR-1 (performance))\r\n* RPC/HTTP: RESTful API (Justification: meets ASR-2 (security))\r\n* Persistence: PostgreSQL 14-15 (Justification: meets ASR-1 (data durability))\r\n* Cache: Redis 6-7 (Justification: meets NFR-1 (performance))\r\n* Messaging: RabbitMQ 3-4 (Justification: meets ASR-2 (security))\r\n* Search: Elasticsearch 7-8 (Justification: meets NFR-1 (performance))\r\n* Authn/authz: OAuth2 (Justification: meets ASR-2 (security))\r\n* Observability: Prometheus 2-3 (Justification: meets NFR-1 (performance))\r\n* CI/CD: Jenkins 2-3 (Justification: meets ASR-1 (data durability))\r\n* Container runtime: Docker 20-21 (Justification: meets ASR-1 (data durability))\r\n* Infra provisioning: Terraform 1-2 (Justification: meets ASR-1 (data durability))\r\n\r\n### Recommended default stack\r\n* Node.js 18\r\n* Express.js 4\r\n* PostgreSQL 14\r\n* Redis 6\r\n* RabbitMQ 3\r\n* Elasticsearch 7\r\n* OAuth2\r\n* Prometheus 2\r\n* Jenkins 2\r\n* Docker 20\r\n* Terraform 1\r\n\r\nJustification: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)\r\n\r\n### Interface design\r\n#### External APIs\r\n```yml\r\nopenapi: 3.0.0\r\ninfo:\r\n  title: Space Fractions API\r\n  description: API for the Space Fractions game\r\n  version: 1.0.0\r\npaths:\r\n  /play:\r\n    get:\r\n      summary: Play the game\r\n      responses:\r\n        200:\r\n          description: Game started\r\n          content:\r\n            application/json:\r\n              schema:\r\n                type: object\r\n                properties:\r\n                  gameId:\r\n                    type: integer\r\n                    description: Game ID\r\n```\r\n#### Internal contracts\r\n```proto\r\nsyntax = \"proto3\";\r\npackage spacefractions;\r\nservice GameService {\r\n  rpc Play(PlayRequest) returns (PlayResponse) {}\r\n}\r\nmessage PlayRequest {\r\n  int32 gameId = 1;\r\n}\r\nmessage PlayResponse {\r\n  int32 gameId = 1;\r\n}\r\n```\r\n### Data model / schema\r\n```sql\r\nCREATE TABLE games (\r\n  id SERIAL PRIMARY KEY,\r\n  game_state JSONB NOT NULL\r\n);\r\n```\r\n### Caching & consistency strategy\r\n* Cache game state in Redis\r\n* Use PostgreSQL for data persistence\r\n* Implement data replication for high availability\r\n\r\n# E. Operations & Deployment\r\n## Kubernetes-ready plan\r\n```yml\r\napiVersion: apps/v1\r\nkind: Deployment\r\nmetadata:\r\n  name: spacefractions\r\nspec:\r\n  replicas: 3\r\n  selector:\r\n    matchLabels:\r\n      app: spacefractions\r\n  template:\r\n    metadata:\r\n      labels:\r\n        app: spacefractions\r\n    spec:\r\n      containers:\r\n      - name: spacefractions\r\n        image: spacefractions:latest\r\n        ports:\r\n        - containerPort: 80\r\n```\r\n## DB HA topology\r\n* Use PostgreSQL replication for high availability\r\n* Implement regular backups and data replication\r\n\r\n# F. Security Design\r\n## Auth & AuthZ\r\n* Implement OAuth2 for authentication and authorization\r\n* Use secure password storage and transmission\r\n\r\n## Secrets management & rotation policy\r\n* Use a secrets manager like Hashicorp's Vault\r\n* Rotate secrets regularly\r\n\r\n## TLS & service-mesh considerations\r\n* Implement TLS encryption for all communication\r\n* Use a service mesh like Istio for traffic management and security\r\n\r\n## Threat model summary\r\n* Top 5 threats: unauthorized access, data breaches, denial of service, malware, and phishing\r\n* Mitigations: implement secure authentication and authorization, use encryption, and monitor for suspicious activity\r\n\r\n# G. Observability & SRE\r\n## Key per-component & business metrics\r\n* GameComponent: game start rate, game completion rate, user engagement\r\n* QuestionComponent: question response rate, question accuracy rate\r\n\r\n## SLOs, error budgets, RTO/RPO\r\n* SLO: 99.99% uptime\r\n* Error budget: 1%\r\n* RTO: 1 hour\r\n* RPO: 1 hour\r\n\r\n## Dashboard & runbook sketch\r\n* Implement a dashboard for monitoring key metrics\r\n* Create a runbook for common issues and errors\r\n\r\n# H. Testing Strategy\r\n## Matrix mapping Unit / Integration / Contract / E2E / Chaos tests to components\r\n| Test Type | GameComponent | QuestionComponent |\r\n| --- | --- | --- |\r\n| Unit testing | | |\r\n| Integration testing | | |\r\n| Contract testing | | |\r\n| E2E testing | | |\r\n| Chaos testing | | |\r\n\r\n## Test data management and environment isolation strategy\r\n* Use a test data management tool like TestRail\r\n* Implement environment isolation using Docker and Kubernetes\r\n\r\n# I. Migration, Data Conversion & Rollout Plan\r\n## High-level migration steps\r\n1. Migrate game data to new database\r\n2. Update game logic to use new database\r\n3. Deploy new game component\r\n\r\n## Data-sync strategies\r\n* Use a data sync tool like Apache NiFi\r\n* Implement data replication for high availability\r\n\r\n## Backwards compatibility notes and migration windows for public APIs\r\n* Implement backwards compatibility for 1 year\r\n* Use a migration window of 1 month\r\n\r\n# J. Tradeoffs & Alternatives\r\n## For each major decision\r\n* Alternative 1: Use a monolithic architecture\r\n* Alternative 2: Use a serverless architecture\r\n* Why chosen: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)\r\n\r\n# K. Open Questions & Assumptions\r\n## Assumptions\r\nA1: The game will be played by 1000 users concurrently\r\nA2: The game will be played for 1 hour per session\r\n\r\n## Unresolved stakeholder questions needing input\r\n* What is the expected user growth rate?\r\n* What is the expected game session length?\r\n\r\n# L. Deliverables\r\n```markdown\r\narchitecture.md\r\nopenapi.yaml\r\ninternal.proto\r\nk8s/spacefractions-deployment.yaml\r\nsql/game_ddl.sql\r\ntraceability_matrix.csv\r\n```\r\n```yml\r\nopenapi: 3.0.0\r\ninfo:\r\n  title: Space Fractions API\r\n  description: API for the Space Fractions game\r\n  version: 1.0.0\r\npaths:\r\n  /play:\r\n    get:\r\n      summary: Play the game\r\n      responses:\r\n        200:\r\n          description: Game started\r\n          content:\r\n            application/json:\r\n              schema:\r\n                type: object\r\n                properties:\r\n                  gameId:\r\n                    type: integer\r\n                    description: Game ID\r\n```\r\n```proto\r\nsyntax = \"proto3\";\r\npackage spacefractions;\r\nservice GameService {\r\n  rpc Play(PlayRequest) returns (PlayResponse) {}\r\n}\r\nmessage PlayRequest {\r\n  int32 gameId = 1;\r\n}\r\nmessage PlayResponse {\r\n  int32 gameId = 1;\r\n}\r\n```\r\n```yml\r\napiVersion: apps/v1\r\nkind: Deployment\r\nmetadata:\r\n  name: spacefractions\r\nspec:\r\n  replicas: 3\r\n  selector:\r\n    matchLabels:\r\n      app: spacefractions\r\n  template:\r\n    metadata:\r\n      labels:\r\n        app: spacefractions\r\n    spec:\r\n      containers:\r\n      - name: spacefractions\r\n        image: spacefractions:latest\r\n        ports:\r\n        - containerPort: 80\r\n```\r\n```sql\r\nCREATE TABLE games (\r\n  id SERIAL PRIMARY KEY,\r\n  game_state JSONB NOT NULL\r\n);\r\n```\r\n```csv\r\nRequirement ID,Short Text,Diagram(s),Component(s),Artifact filename(s),Rationale\r\nFR-1,Play game,UseCaseDiagram,GameComponent,openapi.yaml,Allows users to play the game\r\nNFR-1,Performance,SequenceDiagram1,GameComponent,internal.proto,Ensures the game responds quickly to user input\r\nASR-1,Data durability,DeploymentDiagram,QuestionComponent,sql/question_ddl.sql,Ensures that question data is persisted and recoverable\r\n```\r\n# How to review\r\n* All FR/NFR/ASR present in traceability matrix?\r\n* OpenAPI + internal API contract included and valid?\r\n* Each major component has: responsibilities, stack options (3+), recommended stack + ASR/NFR justification, API contract, and data schema?\r\n* k8s snippet present and syntactically valid?\r\n* SQL DDLs provided for persisted entities?\r\n* Assumptions and open questions clearly listed?"
+    },
+    {
+      "role": "views",
+      "name": "Architecture_View.md",
+      "sha256": "77dac057e13f122ddc6fc19294490c6a961f00429b72f15df81a81adc91bdbc8",
+      "bytes": 4242,
+      "text": "## ScenarioView\r\n1. UseCase — Scenario View: Use Case Diagram\r\n```plantuml\r\n@startuml UseCaseDiagram\r\nleft to right direction\r\nactor EndUser as \"End User\"\r\nactor Admin as \"Admin\"\r\nrectangle System {\r\n  usecase \"Play Game\" as (PlayGame)\r\n  usecase \"View Score\" as (ViewScore)\r\n  usecase \"Update Questions\" as (UpdateQuestions)\r\n  usecase \"View Help\" as (ViewHelp)\r\n}\r\nEndUser -- (PlayGame)\r\nEndUser -- (ViewScore)\r\nEndUser -- (ViewHelp)\r\nAdmin -- (UpdateQuestions)\r\n@enduml\r\n```\r\n\r\n## LogicView\r\n2. Class — Logic View: Class Diagram\r\n```plantuml\r\n@startuml ClassDiagram\r\nclass Game {\r\n  - id: string\r\n  - score: int\r\n  + play(): void\r\n  + viewScore(): int\r\n}\r\nclass Question {\r\n  - id: string\r\n  - prompt: string\r\n  - options: List<string>\r\n  + getPrompt(): string\r\n  + getOptions(): List<string>\r\n}\r\nclass User {\r\n  - id: string\r\n  - username: string\r\n  + playGame(game: Game): void\r\n  + viewScore(game: Game): int\r\n}\r\nclass Admin {\r\n  - id: string\r\n  - username: string\r\n  + updateQuestions(questions: List<Question>): void\r\n}\r\nGame --* Question\r\nUser --* Game\r\nAdmin --* Question\r\n@enduml\r\n```\r\n3. Object — Logic View: Object Diagram\r\n```plantuml\r\n@startuml ObjectDiagram\r\nparticipant game1\r\nparticipant question1\r\nparticipant user1\r\nparticipant admin1\r\ngame1 --> question1\r\nuser1 --> game1\r\nadmin1 --> question1\r\n@enduml\r\n```\r\n4. State — Logic View: State Diagram\r\n```plantuml\r\n@startuml StateDiagram\r\nstate Playing\r\nstate Paused\r\nstate GameOver\r\n[*] --> Playing\r\nPlaying --> Paused : pause()\r\nPaused --> Playing : resume()\r\nPlaying --> GameOver : gameOver()\r\n@enduml\r\n```\r\n\r\n## ProcessView\r\n5. Activity — Process View: Activity Diagram\r\n```plantuml\r\n@startuml ActivityDiagram\r\nstart\r\n:play game;\r\nif (game over?) then (yes)\r\n  :game over;\r\nelse (no)\r\n  :continue playing;\r\nendif\r\n:calculate score;\r\n:display score;\r\nstop\r\n@enduml\r\n```\r\n6. Sequence — Process View: Sequence Diagram \r\n```plantuml\r\n@startuml SequenceDiagram1\r\nparticipant User\r\nparticipant Game\r\nparticipant Question\r\nUser->>Game: play()\r\nGame->>Question: getPrompt()\r\nQuestion->>Game: return prompt\r\nGame->>User: display prompt\r\nUser->>Game: submit answer\r\nGame->>Question: check answer\r\nQuestion->>Game: return result\r\nGame->>User: display result\r\n@enduml\r\n```\r\n```plantuml\r\n@startuml SequenceDiagram2\r\nparticipant Admin\r\nparticipant Question\r\nAdmin->>Question: update()\r\nQuestion->>Admin: return success\r\n@enduml\r\n```\r\n7. Collaboration — Process View: Collaboration Diagram\r\n```plantuml\r\n@startuml CollaborationDiagram1\r\nparticipant User\r\nparticipant Game\r\nparticipant Question\r\nUser->>Game: play()\r\nGame->>Question: getPrompt()\r\nQuestion->>Game: return prompt\r\nGame->>User: display prompt\r\nUser->>Game: submit answer\r\nGame->>Question: check answer\r\nQuestion->>Game: return result\r\nGame->>User: display result\r\nnote right of Game: Scenario: Play Game\r\n@enduml\r\n```\r\n```plantuml\r\n@startuml CollaborationDiagram2\r\nparticipant Admin\r\nparticipant Question\r\nAdmin->>Question: update()\r\nQuestion->>Admin: return success\r\nnote right of Question: Scenario: Update Questions\r\n@enduml\r\n```\r\n\r\n## DevelopmentView\r\n8. Package — Development View: Package Diagram\r\n```plantuml\r\n@startuml PackageDiagram\r\npackage Game {\r\n  class Game\r\n  class Question\r\n}\r\npackage User {\r\n  class User\r\n}\r\npackage Admin {\r\n  class Admin\r\n}\r\nGame -- User\r\nGame -- Admin\r\n@enduml\r\n```\r\n9. Component — Development View: Component Diagram\r\n```plantuml\r\n@startuml ComponentDiagram\r\nartifact GameComponent\r\nartifact QuestionComponent\r\nartifact UserComponent\r\nartifact AdminComponent\r\nGameComponent -- QuestionComponent\r\nGameComponent -- UserComponent\r\nGameComponent -- AdminComponent\r\n@enduml\r\n```\r\n\r\n## PhysicalView\r\n10. Deployment — Physical View: Deployment Diagram\r\n```plantuml\r\n@startuml DeploymentDiagram\r\nnode GameServer\r\nnode QuestionServer\r\nnode UserClient\r\nnode AdminClient\r\nGameServer -- QuestionServer\r\nGameServer -- UserClient\r\nGameServer -- AdminClient\r\n@enduml\r\n```\r\n11. Container — Physical View: Container Diagram\r\n```plantuml\r\n@startuml ContainerDiagram\r\nartifact GameContainer\r\nartifact QuestionContainer\r\nartifact UserContainer\r\nartifact AdminContainer\r\nGameContainer -- QuestionContainer\r\nGameContainer -- UserContainer\r\nGameContainer -- AdminContainer\r\n@enduml\r\n```"
+    }
+  ],
+  "purpose": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 6,
+      "text": "# A. Executive Summary"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 7,
+      "text": "The Space Fractions system is a web-based, interactive learning tool designed to improve fraction-solving skills for sixth-grade students. The system consists of an introductory movie, a main menu, a series of fraction questions, and an ending scene with feedback. The architecture will follow a microservices approach, with separate components for the game logic, question management, and user interface. The system will be deployed on a cloud-based infrastructure, ensuring scalability and availability."
+    }
+  ],
+  "features": [
+    {
+      "name": "Play Game",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 9,
+          "text": "usecase \"Play Game\" as (PlayGame)"
+        }
+      ]
+    },
+    {
+      "name": "View Score",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 10,
+          "text": "usecase \"View Score\" as (ViewScore)"
+        }
+      ]
+    },
+    {
+      "name": "Update Questions",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 11,
+          "text": "usecase \"Update Questions\" as (UpdateQuestions)"
+        }
+      ]
+    },
+    {
+      "name": "View Help",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 12,
+          "text": "usecase \"View Help\" as (ViewHelp)"
+        }
+      ]
+    }
+  ],
+  "narrative_features": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 7,
+      "text": "The Space Fractions system is a web-based, interactive learning tool designed to improve fraction-solving skills for sixth-grade students. The system consists of an introductory movie, a main menu, a series of fraction questions, and an ending scene with feedback. The architecture will follow a microservices approach, with separate components for the game logic, question management, and user interface. The system will be deployed on a cloud-based infrastructure, ensuring scalability and availability."
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 105,
+      "text": "User->>Game: submit answer"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 108,
+      "text": "Game->>User: display result"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 129,
+      "text": "User->>Game: submit answer"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 132,
+      "text": "Game->>User: display result"
+    }
+  ],
+  "actors": [
+    {
+      "name": "EndUser",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 6,
+          "text": "actor EndUser as \"End User\""
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 7,
+          "text": "actor Admin as \"Admin\""
+        }
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "name": "Game",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 25,
+          "text": "class Game {"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 151,
+          "text": "class Game"
+        }
+      ]
+    },
+    {
+      "name": "Question",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 31,
+          "text": "class Question {"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 152,
+          "text": "class Question"
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 38,
+          "text": "class User {"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 155,
+          "text": "class User"
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 44,
+          "text": "class Admin {"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 158,
+          "text": "class Admin"
+        }
+      ]
+    }
+  ],
+  "components": [
+    {
+      "name": "GameComponent",
+      "evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 40,
+          "text": "* GameComponent: responsible for game logic and user interaction"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 176,
+          "text": "* GameComponent: game start rate, game completion rate, user engagement"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 167,
+          "text": "artifact GameComponent"
+        }
+      ]
+    },
+    {
+      "name": "QuestionComponent",
+      "evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 41,
+          "text": "* QuestionComponent: responsible for question management and data persistence"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 177,
+          "text": "* QuestionComponent: question response rate, question accuracy rate"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 168,
+          "text": "artifact QuestionComponent"
+        }
+      ]
+    },
+    {
+      "name": "UserComponent",
+      "evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 42,
+          "text": "* UserComponent: responsible for user authentication and authorization"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 169,
+          "text": "artifact UserComponent"
+        }
+      ]
+    },
+    {
+      "name": "AdminComponent",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 170,
+          "text": "artifact AdminComponent"
+        }
+      ]
+    }
+  ],
+  "states": [
+    {
+      "name": "Playing",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 69,
+          "text": "state Playing"
+        }
+      ]
+    },
+    {
+      "name": "Paused",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 70,
+          "text": "state Paused"
+        }
+      ]
+    },
+    {
+      "name": "GameOver",
+      "evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 71,
+          "text": "state GameOver"
+        }
+      ]
+    }
+  ],
+  "state_transitions": [
+    {
+      "source": "Architecture_View.md",
+      "line": 73,
+      "text": "Playing --> Paused : pause()"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 74,
+      "text": "Paused --> Playing : resume()"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 75,
+      "text": "Playing --> GameOver : gameOver()"
+    }
+  ],
+  "persistence": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 18,
+      "text": "| 3. Data loss | Implement regular backups and data replication |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 24,
+      "text": "| ASR-1 (data durability) | Unit testing, Integration testing |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 35,
+      "text": "| ASR-1 | Data durability | DeploymentDiagram | QuestionComponent | sql/question_ddl.sql | Ensures that question data is persisted and recoverable |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 41,
+      "text": "* QuestionComponent: responsible for question management and data persistence"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 52,
+      "text": "* Language/runtime: Node.js 18-20 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 55,
+      "text": "* Persistence: PostgreSQL 14-15 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 61,
+      "text": "* CI/CD: Jenkins 2-3 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 62,
+      "text": "* Container runtime: Docker 20-21 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 63,
+      "text": "* Infra provisioning: Terraform 1-2 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 68,
+      "text": "* PostgreSQL 14"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 78,
+      "text": "Justification: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 120,
+      "text": "CREATE TABLE games ("
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 127,
+      "text": "* Use PostgreSQL for data persistence"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 128,
+      "text": "* Implement data replication for high availability"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 154,
+      "text": "* Use PostgreSQL replication for high availability"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 155,
+      "text": "* Implement regular backups and data replication"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 211,
+      "text": "* Implement data replication for high availability"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 221,
+      "text": "* Why chosen: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 298,
+      "text": "CREATE TABLE games ("
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 307,
+      "text": "ASR-1,Data durability,DeploymentDiagram,QuestionComponent,sql/question_ddl.sql,Ensures that question data is persisted and recoverable"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 314,
+      "text": "* SQL DDLs provided for persisted entities?"
+    }
+  ],
+  "interfaces": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 54,
+      "text": "* RPC/HTTP: RESTful API (Justification: meets ASR-2 (security))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 59,
+      "text": "* Authn/authz: OAuth2 (Justification: meets ASR-2 (security))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 72,
+      "text": "* OAuth2"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 83,
+      "text": "openapi: 3.0.0"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 89,
+      "text": "/play:"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 108,
+      "text": "service GameService {"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 109,
+      "text": "rpc Play(PlayRequest) returns (PlayResponse) {}"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 159,
+      "text": "* Implement OAuth2 for authentication and authorization"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 242,
+      "text": "openapi: 3.0.0"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 248,
+      "text": "/play:"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 266,
+      "text": "service GameService {"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 267,
+      "text": "rpc Play(PlayRequest) returns (PlayResponse) {}"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 11,
+      "text": "usecase \"Update Questions\" as (UpdateQuestions)"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 17,
+      "text": "Admin -- (UpdateQuestions)"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 47,
+      "text": "+ updateQuestions(questions: List<Question>): void"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 106,
+      "text": "Game->>Question: check answer"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 130,
+      "text": "Game->>Question: check answer"
+    }
+  ],
+  "constraints": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 17,
+      "text": "| 2. Security vulnerabilities | Implement encryption and secure authentication |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 24,
+      "text": "| ASR-1 (data durability) | Unit testing, Integration testing |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 25,
+      "text": "| NFR-1 (performance) | Load testing, Stress testing |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 26,
+      "text": "| ASR-2 (security) | Penetration testing, Vulnerability scanning |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 34,
+      "text": "| NFR-1 | Performance | SequenceDiagram1 | GameComponent | internal.proto | Ensures the game responds quickly to user input |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 35,
+      "text": "| ASR-1 | Data durability | DeploymentDiagram | QuestionComponent | sql/question_ddl.sql | Ensures that question data is persisted and recoverable |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 42,
+      "text": "* UserComponent: responsible for user authentication and authorization"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 52,
+      "text": "* Language/runtime: Node.js 18-20 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 53,
+      "text": "* Web framework: Express.js 4-5 (Justification: meets NFR-1 (performance))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 54,
+      "text": "* RPC/HTTP: RESTful API (Justification: meets ASR-2 (security))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 55,
+      "text": "* Persistence: PostgreSQL 14-15 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 56,
+      "text": "* Cache: Redis 6-7 (Justification: meets NFR-1 (performance))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 57,
+      "text": "* Messaging: RabbitMQ 3-4 (Justification: meets ASR-2 (security))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 58,
+      "text": "* Search: Elasticsearch 7-8 (Justification: meets NFR-1 (performance))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 59,
+      "text": "* Authn/authz: OAuth2 (Justification: meets ASR-2 (security))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 60,
+      "text": "* Observability: Prometheus 2-3 (Justification: meets NFR-1 (performance))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 61,
+      "text": "* CI/CD: Jenkins 2-3 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 62,
+      "text": "* Container runtime: Docker 20-21 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 63,
+      "text": "* Infra provisioning: Terraform 1-2 (Justification: meets ASR-1 (data durability))"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 78,
+      "text": "Justification: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 157,
+      "text": "# F. Security Design"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 159,
+      "text": "* Implement OAuth2 for authentication and authorization"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 168,
+      "text": "* Use a service mesh like Istio for traffic management and security"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 172,
+      "text": "* Mitigations: implement secure authentication and authorization, use encryption, and monitor for suspicious activity"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 180,
+      "text": "* SLO: 99.99% uptime"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 181,
+      "text": "* Error budget: 1%"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 182,
+      "text": "* RTO: 1 hour"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 183,
+      "text": "* RPO: 1 hour"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 221,
+      "text": "* Why chosen: Meets ASR-1 (data durability), NFR-1 (performance), and ASR-2 (security)"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 225,
+      "text": "A1: The game will be played by 1000 users concurrently"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 226,
+      "text": "A2: The game will be played for 1 hour per session"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 306,
+      "text": "NFR-1,Performance,SequenceDiagram1,GameComponent,internal.proto,Ensures the game responds quickly to user input"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 307,
+      "text": "ASR-1,Data durability,DeploymentDiagram,QuestionComponent,sql/question_ddl.sql,Ensures that question data is persisted and recoverable"
+    }
+  ],
+  "artifacts": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 33,
+      "text": "| FR-1 | Play game | UseCaseDiagram | GameComponent | openapi.yaml | Allows users to play the game |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 34,
+      "text": "| NFR-1 | Performance | SequenceDiagram1 | GameComponent | internal.proto | Ensures the game responds quickly to user input |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 35,
+      "text": "| ASR-1 | Data durability | DeploymentDiagram | QuestionComponent | sql/question_ddl.sql | Ensures that question data is persisted and recoverable |"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 234,
+      "text": "architecture.md"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 235,
+      "text": "openapi.yaml"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 236,
+      "text": "internal.proto"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 237,
+      "text": "k8s/spacefractions-deployment.yaml"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 238,
+      "text": "sql/game_ddl.sql"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 239,
+      "text": "traceability_matrix.csv"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 305,
+      "text": "FR-1,Play game,UseCaseDiagram,GameComponent,openapi.yaml,Allows users to play the game"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 306,
+      "text": "NFR-1,Performance,SequenceDiagram1,GameComponent,internal.proto,Ensures the game responds quickly to user input"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 307,
+      "text": "ASR-1,Data durability,DeploymentDiagram,QuestionComponent,sql/question_ddl.sql,Ensures that question data is persisted and recoverable"
+    }
+  ],
+  "source_sections": [
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 6,
+      "text": "# A. Executive Summary"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 28,
+      "text": "# B. Traceability & Rationale"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 37,
+      "text": "# C. Architecture Overview"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 46,
+      "text": "# D. Detailed Technical Design"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 47,
+      "text": "## GameComponent"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 48,
+      "text": "### Responsibilities & data ownership"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 51,
+      "text": "### Technology options"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 65,
+      "text": "### Recommended default stack"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 80,
+      "text": "### Interface design"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 118,
+      "text": "### Data model / schema"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 125,
+      "text": "### Caching & consistency strategy"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 130,
+      "text": "# E. Operations & Deployment"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 131,
+      "text": "## Kubernetes-ready plan"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 153,
+      "text": "## DB HA topology"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 157,
+      "text": "# F. Security Design"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 158,
+      "text": "## Auth & AuthZ"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 162,
+      "text": "## Secrets management & rotation policy"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 166,
+      "text": "## TLS & service-mesh considerations"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 170,
+      "text": "## Threat model summary"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 174,
+      "text": "# G. Observability & SRE"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 175,
+      "text": "## Key per-component & business metrics"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 179,
+      "text": "## SLOs, error budgets, RTO/RPO"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 185,
+      "text": "## Dashboard & runbook sketch"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 189,
+      "text": "# H. Testing Strategy"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 190,
+      "text": "## Matrix mapping Unit / Integration / Contract / E2E / Chaos tests to components"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 199,
+      "text": "## Test data management and environment isolation strategy"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 203,
+      "text": "# I. Migration, Data Conversion & Rollout Plan"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 204,
+      "text": "## High-level migration steps"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 209,
+      "text": "## Data-sync strategies"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 213,
+      "text": "## Backwards compatibility notes and migration windows for public APIs"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 217,
+      "text": "# J. Tradeoffs & Alternatives"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 218,
+      "text": "## For each major decision"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 223,
+      "text": "# K. Open Questions & Assumptions"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 224,
+      "text": "## Assumptions"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 228,
+      "text": "## Unresolved stakeholder questions needing input"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 232,
+      "text": "# L. Deliverables"
+    },
+    {
+      "source": "Architecture_Documentation.md",
+      "line": 309,
+      "text": "# How to review"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 1,
+      "text": "## ScenarioView"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 21,
+      "text": "## LogicView"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 79,
+      "text": "## ProcessView"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 146,
+      "text": "## DevelopmentView"
+    },
+    {
+      "source": "Architecture_View.md",
+      "line": 177,
+      "text": "## PhysicalView"
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "desktop-vs-cloud",
+      "source_evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 7,
+          "text": "The Space Fractions system is a web-based, interactive learning tool designed to improve fraction-solving skills for sixth-grade students. The system consists of an introductory movie, a main menu, a series of fraction questions, and an ending scene with feedback. The architecture will follow a microservices approach, with separate components for the game logic, question management, and user interface. The system will be deployed on a cloud-based infrastructure, ensuring scalability and availability."
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 9,
+          "text": "Chosen architectural style: Microservices"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 10,
+          "text": "Deployment topology: Cloud-based infrastructure"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 44,
+          "text": "The system follows a microservices architecture, with each component communicating with others through APIs."
+        }
+      ],
+      "decision": "Provisional modular local desktop implementation; cloud topology remains unimplemented pending clarification.",
+      "approved_by_professor": false
+    },
+    {
+      "id": "question-check-contract",
+      "source_evidence": [
+        {
+          "source": "Architecture_View.md",
+          "line": 31,
+          "text": "class Question {"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 106,
+          "text": "Game->>Question: check answer"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 130,
+          "text": "Game->>Question: check answer"
+        },
+        {
+          "source": "Architecture_View.md",
+          "line": 152,
+          "text": "class Question"
+        }
+      ],
+      "decision": "Add an explicit answer-checking method to complete the interaction contract.",
+      "approved_by_professor": false
+    },
+    {
+      "id": "slo-error-budget",
+      "source_evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 179,
+          "text": "## SLOs, error budgets, RTO/RPO"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 180,
+          "text": "* SLO: 99.99% uptime"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 181,
+          "text": "* Error budget: 1%"
+        }
+      ],
+      "decision": "Record inconsistent source targets; make no production availability claim.",
+      "approved_by_professor": false
+    },
+    {
+      "id": "question-vs-game-schema",
+      "source_evidence": [
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 35,
+          "text": "| ASR-1 | Data durability | DeploymentDiagram | QuestionComponent | sql/question_ddl.sql | Ensures that question data is persisted and recoverable |"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 120,
+          "text": "CREATE TABLE games ("
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 238,
+          "text": "sql/game_ddl.sql"
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 298,
+          "text": "CREATE TABLE games ("
+        },
+        {
+          "source": "Architecture_Documentation.md",
+          "line": 307,
+          "text": "ASR-1,Data durability,DeploymentDiagram,QuestionComponent,sql/question_ddl.sql,Ensures that question data is persisted and recoverable"
+        }
+      ],
+      "decision": "Document both source artifacts and request explicit question and score persistence in the desktop project.",
+      "approved_by_professor": false
+    }
+  ],
+  "delivery_constraints": [
+    {
+      "requirement": "Windows desktop agent as a double-click executable without pre-installed Python.",
+      "source": "Task1-EN.docx"
+    },
+    {
+      "requirement": "Use official DeepSeek API and exact model deepseek-v4-pro.",
+      "source": "Task1-EN.docx"
+    },
+    {
+      "requirement": "Generated game has a desktop UI.",
+      "source": "Professor follow-up email screenshot"
+    },
+    {
+      "requirement": "Cumulative paid API cost conservatively limited to USD 1.",
+      "source": "Professor follow-up email screenshot; cumulative scope is a provisional assumption"
+    }
+  ],
+  "implementation_assumptions": [
+    "Use a modular Python/Tkinter desktop target with local persistence as a provisional adaptation, not an approved cloud replacement.",
+    "Use original multiple-choice fraction questions, exact rational comparison, one point per correct answer, and no duplicate scoring.",
+    "Use an original short animated introduction with skip; no supplied movie asset exists.",
+    "Keep player and administrator responsibilities separate; local password roles are not OAuth2.",
+    "Do not claim 1000-user scalability, cloud high availability, or production SLO verification."
+  ]
+}
