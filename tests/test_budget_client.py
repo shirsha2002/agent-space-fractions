@@ -9,6 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
 import unittest
+import unittest.mock
 import urllib.error
 
 from code_agent.budget import BudgetError, BudgetLedger, Pricing, normalize_usage
@@ -58,6 +59,7 @@ class BudgetTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
 
+    @unittest.mock.patch("code_agent.budget.time_factor", lambda created_at: Decimal(1))
     def test_precise_cache_accounting_and_no_reasoning_double_charge(self):
         ident = self.ledger.reserve("offline", MESSAGES, 300)
         totals = self.ledger.settle(ident, USAGE)
@@ -230,3 +232,12 @@ class ClientTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PeakPricingTests(unittest.TestCase):
+    def test_off_peak_requests_settle_at_half_the_peak_rate(self):
+        from code_agent.budget import time_factor
+        self.assertEqual(time_factor("2026-10-30T07:32:00+00:00"), 1)       # Friday 07:32 UTC: peak
+        self.assertEqual(time_factor("2026-11-02T12:45:00+00:00"), Decimal("0.5"))  # Monday 12:45 UTC
+        self.assertEqual(time_factor("2026-11-01T07:00:00+00:00"), Decimal("0.5"))  # Sunday
+        self.assertEqual(time_factor("not a time"), 1)                      # unknown: assume peak

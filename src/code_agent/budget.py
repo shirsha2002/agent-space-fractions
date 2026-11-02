@@ -55,6 +55,22 @@ class Pricing:
 UNBILLED_REJECTIONS = frozenset({401, 402, 403, 429})
 
 
+def is_peak(moment: datetime) -> bool:
+    """DeepSeek peak: 01:00-04:00 and 06:00-10:00 UTC, Monday-Friday (public holidays treated as peak)."""
+    moment = moment.astimezone(timezone.utc)
+    return moment.weekday() < 5 and (1 <= moment.hour < 4 or 6 <= moment.hour < 10)
+
+
+def time_factor(created_at: str) -> Decimal:
+    """Settled charges use the rate in force when the request was sent; off-peak is half price.
+    Reservations still assume peak, so the pre-call bound stays conservative."""
+    try:
+        moment = datetime.fromisoformat(created_at)
+    except (TypeError, ValueError):
+        return Decimal(1)
+    return Decimal(1) if is_peak(moment) else Decimal("0.5")
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -177,7 +193,7 @@ class BudgetLedger:
                 "uncertain": any(r["status"] == "uncertain" for r in rows),
                 "pending": any(r["status"] == "reserved" for r in rows),
                 "request_count": len(rows), "tokens": tokens,
-                "cost_basis": "Application estimate at published peak USD rates; not a provider bill."}
+                "cost_basis": "Application estimate at published peak/off-peak USD rates (reservations at peak); not a provider bill."}
 
     def snapshot(self) -> dict[str, Any]:
         with self._connection() as db:
@@ -220,7 +236,8 @@ class BudgetLedger:
                 raise BudgetError("Only an outstanding reservation can be settled.")
             pricing = Pricing(**json.loads(row["pricing_json"]))
             hit, miss, output = pricing.rates()
-            charge = (Decimal(normalized["prompt_cache_hit_tokens"]) * hit
+            factor = time_factor(row["created_at"])
+            charge = factor * (Decimal(normalized["prompt_cache_hit_tokens"]) * hit
                       + Decimal(normalized["prompt_cache_miss_tokens"]) * miss
                       + Decimal(normalized["completion_tokens"]) * output) / MILLION
             safe_id = request_id if isinstance(request_id, str) and len(request_id) < 200 else None
