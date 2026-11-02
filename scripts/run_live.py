@@ -94,7 +94,7 @@ def main():
             raise ValueError("Inspect source first, then supply --run-directory and --reviewed-source.")
         agent = restore(api, book, options.run_directory, allow_patch=options.action == "patch")
         save_json(agent.pending["root"] / f"source_review_{agent.pending['repairs']}.json",
-                  {"reviewer": "Codex acting for the project owner", "reviewed_manifest_round": agent.pending["repairs"],
+                  {"reviewer": "Operator (AI-assisted) acting for the project owner", "reviewed_manifest_round": agent.pending["repairs"],
                    "statement": "Source inspected before generated-code execution; process limits are not a sandbox."})
         if options.action == "patch":
             if not options.patch_file or not options.reason:
@@ -103,7 +103,7 @@ def main():
         else:
             findings = json.loads(options.review_findings_file.read_text(encoding="utf-8")) if options.review_findings_file else None
             result = agent.verify(review_findings=findings)
-    print(json.dumps({"status": result["status"], "run_directory": str(result["run_dir"].relative_to(ROOT)),
+    print(json.dumps({"status": result["status"], "run_directory": result["run_dir"].name,
                       "repairs_used": result["repairs_used"], "error": result["error"],
                       "budget": book.snapshot()}), flush=True)
     return 0 if result["status"] in {"review_required", "tests_passed"} else 1

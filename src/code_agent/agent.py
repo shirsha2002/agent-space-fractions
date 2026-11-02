@@ -215,7 +215,7 @@ class CodeAgent:
                 updated["files"].append({"path": path, "content": content})
         updated = parse_manifest(json.dumps(updated))
         number = len(p.get("manual_adjustments", [])) + 1
-        record = {"revision": number, "reviewer": "Codex acting for the project owner",
+        record = {"revision": number, "reviewer": "Operator (AI-assisted) acting for the project owner",
                   "timestamp_utc": datetime.now(timezone.utc).isoformat(), "reason": reason, "files": changes,
                   "additional_model_calls": 0}
         save_json(p["root"] / f"manual_patch_{number}_before.json", previous)

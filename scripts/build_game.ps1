@@ -113,7 +113,7 @@ finally { Pop-Location }
 $Executable = Join-Path $Distribution 'SpaceFractions.exe'
 if (-not (Test-Path -LiteralPath $Executable -PathType Leaf)) { throw 'Expected game executable is missing.' }
 $VerifiedSummary = Get-Content -LiteralPath (Join-Path $EvidenceDirectory 'run_summary.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-$ManualAdjustments = if ($VerifiedSummary.PSObject.Properties.Name -contains 'manual_adjustments') { @($VerifiedSummary.manual_adjustments) } else { @() }
+$ManualAdjustments = @(if ($VerifiedSummary.PSObject.Properties.Name -contains 'manual_adjustments') { $VerifiedSummary.manual_adjustments })
 $Evidence = [ordered]@{
     created_utc = [DateTime]::UtcNow.ToString('o')
     source_run_id = $VerifiedSummary.run_id
