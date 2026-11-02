@@ -10,7 +10,7 @@ import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from .agent import CodeAgent, RunConfig
+from .agent import MAX_REPAIRS, CodeAgent, RunConfig
 from .budget import BudgetLedger
 from .model_client import DeepSeekClient
 from .offline import OfflineClient
@@ -45,7 +45,7 @@ class AgentWindow:
         self.output = tk.StringVar(value=str(Path.home() / "Documents" / "Task1Runs"))
         self.authorization = tk.BooleanVar(value=False)
         self.reviewed = tk.BooleanVar(value=False)
-        self.repairs = tk.IntVar(value=2)
+        self.repairs = tk.IntVar(value=MAX_REPAIRS)
         self.tokens = tk.IntVar(value=16000)
         self.status = tk.StringVar(value="Ready · offline mode")
         self.budget_text = tk.StringVar()
@@ -117,7 +117,7 @@ class AgentWindow:
         self.token_spin = ttk.Spinbox(controls, from_=1000, to=24000, increment=1000, width=7, textvariable=self.tokens)
         self.token_spin.pack(side="left", padx=(8, 16))
         ttk.Label(controls, text="Repairs", style="Muted.TLabel").pack(side="left")
-        self.repair_spin = ttk.Spinbox(controls, from_=0, to=2, width=3, textvariable=self.repairs)
+        self.repair_spin = ttk.Spinbox(controls, from_=0, to=MAX_REPAIRS, width=3, textvariable=self.repairs)
         self.repair_spin.pack(side="left", padx=8)
         self.paid_check = ttk.Checkbutton(setup, text="I authorize paid calls within the cumulative USD 1 cap.", variable=self.authorization)
         self.paid_check.pack(anchor="w", pady=5)

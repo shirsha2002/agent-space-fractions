@@ -37,6 +37,23 @@ if unanswered or not playing, advances index after answered and sets state='game
 after last. pause()/resume() handle playing/paused. restart() resets all state.
 State strings exactly playing, paused, game_over. GUI uses this API.
 
+Host safety checks REJECT the whole project if any file (tests included):
+imports subprocess, ctypes, socket, urllib, http, ftplib, requests, winreg, importlib,
+pickle, marshal or multiprocessing; calls eval, exec, compile or __import__; or calls
+os.remove, unlink, rmdir, rmtree, chmod, chown, system or popen. In tests create
+temporary databases with tempfile.TemporaryDirectory() (or tempfile.mkdtemp plus no
+manual deletion) and never delete files yourself.
+
+Known pitfalls from earlier runs - avoid all of them:
+- Tk colours must be '#rrggbb' hex or plain Tk names ('white', 'silver'); never '#silver'.
+- Every Question in code AND tests uses a valid fraction answer such as '3/4' that is
+  one of its options; never placeholders like 'a'.
+- Tests must match this exact implementation: a salted hash differs per call, so test
+  verify_password, not equal hashes. No test may depend on random order or timing.
+- Main window must open without error when run as python main.py: every widget option,
+  colour and font must be valid, and no seeded question may fail validation.
+- The GUI score must update from the submit() return value and Game.score only.
+
 README explains launch python main.py, tests, persistence, credentials setup and
 assumptions. Bound total source to 60KB ideally; maximum 50 files; avoid unnecessary
 frameworks. Test files import project modules from project root. Never claim test

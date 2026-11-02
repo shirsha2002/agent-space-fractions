@@ -14,6 +14,9 @@ from .requirements import normalize_inputs
 from .prompts import generation_messages, repair_messages
 from .workspace_tools import parse_manifest, materialize, ensure_regular_tree
 from .contracts import GAME_CONTRACT
+
+# Effectively unlimited; the cumulative USD 1 ledger is the real stop.
+MAX_REPAIRS = 20
 from .validator import static_validate, run_tests, startup_check
 
 
@@ -116,8 +119,8 @@ class CodeAgent:
                 return check
 
     def run(self, config: RunConfig) -> dict:
-        if not 0 <= config.max_repairs <= 2 or not 1000 <= config.max_tokens <= 24000:
-            raise ValueError("Repairs must be 0–2 and output cap 1000–24000 tokens")
+        if not 0 <= config.max_repairs <= MAX_REPAIRS or not 1000 <= config.max_tokens <= 24000:
+            raise ValueError(f"Repairs must be 0–{MAX_REPAIRS} and output cap 1000–24000 tokens")
         bundle = load_inputs(config.architecture, config.views)
         normalized = normalize_inputs(bundle)
         ensure_regular_tree(config.output)
