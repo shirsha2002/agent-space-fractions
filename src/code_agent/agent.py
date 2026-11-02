@@ -13,6 +13,7 @@ from .input_loader import load_inputs
 from .requirements import normalize_inputs
 from .prompts import generation_messages, repair_messages
 from .workspace_tools import parse_manifest, materialize, ensure_regular_tree
+from .contracts import GAME_CONTRACT
 from .validator import static_validate, run_tests, startup_check
 
 
@@ -96,7 +97,9 @@ class CodeAgent:
         self._check_cancel()
         p["repairs"] += 1
         self.log(f"Repair {p['repairs']}/{p['config'].max_repairs}")
-        self._write(self._complete(repair_messages(p["manifest"], json.dumps(errors))))
+        report = json.dumps(errors)
+        contract = GAME_CONTRACT if "independent_fraction_rules" in report else None
+        self._write(self._complete(repair_messages(p["manifest"], report, contract)))
         return True
 
     def _static(self):

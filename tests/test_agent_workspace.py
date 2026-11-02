@@ -369,3 +369,14 @@ class StartupCheckTests(unittest.TestCase):
             root = self.project(folder, "import tkinter as tk\nroot = tk.Tk()\n"
                                         "tk.Label(root, text='ok').pack()\nroot.mainloop()\n")
             self.assertTrue(startup_check(root)["ok"])
+
+
+class RepairPromptTests(unittest.TestCase):
+    def test_host_contract_failure_ships_the_contract_source_to_the_repair(self):
+        from code_agent.contracts import GAME_CONTRACT
+        from code_agent.prompts import repair_messages
+        manifest = {"project_name": "x", "summary": "x", "files": []}
+        failure = "FAIL: test_score_once_and_states (independent_fraction_rules...) True is not false"
+        content = repair_messages(manifest, failure, GAME_CONTRACT)[-1]["content"]
+        self.assertIn("self.assertFalse(game.submit(\"2/3\"))", content)
+        self.assertNotIn("independent_fraction_rules.py, read-only", repair_messages(manifest, "SyntaxError")[-1]["content"])

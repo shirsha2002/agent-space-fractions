@@ -30,7 +30,8 @@ Stable public game_core API REQUIRED for independently maintained contract check
 Question(qid, prompt, options, answer, explanation='') with check(answer_string)->bool.
 check accepts equivalent fraction strings using fractions.Fraction; invalid input gives
 False. Game(questions) rejects empty list, begins state='playing', score=0, index=0.
-submit(answer_string)->bool scores correct once; raises ValueError when paused,
+submit(answer_string)->bool returns True only when the answer is correct and False when
+it is wrong (never True for a wrong answer); a correct answer scores once; raises ValueError when paused,
 game_over, or current question already answered. next_question() raises ValueError
 if unanswered or not playing, advances index after answered and sets state='game_over'
 after last. pause()/resume() handle playing/paused. restart() resets all state.
@@ -47,9 +48,14 @@ def generation_messages(normalized: dict) -> list[dict]:
             {"role": "user", "content": json.dumps(normalized, ensure_ascii=False)}]
 
 
-def repair_messages(manifest: dict, errors: str) -> list[dict]:
+def repair_messages(manifest: dict, errors: str, contract: str | None = None) -> list[dict]:
     # Only project source and bounded diagnostics, no keys or local paths.
+    reference = ""
+    if contract:
+        # Host-owned checks are not in the project, so a bare traceback is unreadable without them.
+        reference = ("\nThe failing host contract checks (independent_fraction_rules.py, read-only; "
+                     "fix the project, not these checks):\n" + contract)
     return [{"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": "Repair this project against the unchanged protocol. "
-             "Return the complete updated manifest. Failures:\n" + errors[-16000:] +
+             "Return the complete updated manifest. Failures:\n" + errors[-16000:] + reference +
              "\nCurrent project:\n" + json.dumps(manifest, ensure_ascii=False)}]
