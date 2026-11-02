@@ -234,7 +234,7 @@ class AgentWindow:
             messagebox.showerror("Run configuration", str(exc))
 
     def _load(self):
-        folder = filedialog.askdirectory(title="Select a run folder (run_\<id>)", initialdir=self.output.get())
+        folder = filedialog.askdirectory(title="Select a run folder (output/run_/<run id>)", initialdir=self.output.get())
         if not folder:
             return
         try:
