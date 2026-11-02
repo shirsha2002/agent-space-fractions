@@ -392,3 +392,21 @@ class StartupDialogTests(unittest.TestCase):
                 "root = tk.Tk()\nname = simpledialog.askstring('Setup', 'Admin name:', parent=root)\n"
                 "messagebox.showinfo('Done', 'ok')\nroot.mainloop()\n", encoding="utf-8")
             self.assertTrue(startup_check(root)["ok"])
+
+
+class LoadRunTests(unittest.TestCase):
+    def test_a_patched_saved_run_loads_and_launch_guard_accepts_it(self):
+        """A run patched on disk must be loadable instead of failing as 'changed since generation'."""
+        from code_agent.agent import CodeAgent, RunConfig
+        with TemporaryDirectory() as folder:
+            base = Path(folder)
+            agent = CodeAgent(OfflineClient(), BudgetLedger(base / "l.sqlite3"))
+            inputs = Path(__file__).resolve().parents[1] / "inputs"
+            config = RunConfig(inputs / "Architecture_Documentation.md", inputs / "Architecture_View.md", base / "out", offline=True)
+            result = agent.run(config)
+            summary_path = result["run_dir"] / "run_summary.json"
+            summary = json.loads(summary_path.read_text(encoding="utf-8"))
+            summary["mode"] = "live_deepseek"  # load_run only accepts live runs
+            summary_path.write_text(json.dumps(summary), encoding="utf-8")
+            loaded = CodeAgent(OfflineClient(), BudgetLedger(base / "l.sqlite3")).load_run(result["run_dir"], config)
+            self.assertEqual(loaded["run_id"], result["run_id"])

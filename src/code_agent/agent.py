@@ -146,6 +146,28 @@ class CodeAgent:
         except Exception as exc:
             return self._summary("cancelled" if self.cancel_event.is_set() else "failed", error=str(exc))
 
+    def load_run(self, root: Path, config: RunConfig) -> dict:
+        """Resume a saved live run (e.g. after a recorded patch) from its folder on disk."""
+        root = Path(root).resolve(strict=True)
+        summary = json.loads((root / "run_summary.json").read_text(encoding="utf-8"))
+        if summary.get("mode") != "live_deepseek":
+            raise ValueError("Only live DeepSeek runs can be loaded.")
+        bundle = load_inputs(config.architecture, config.views)
+        if summary.get("inputs") != [{k: s[k] for k in ("name", "sha256")} for s in bundle["sources"]]:
+            raise ValueError("The selected input files differ from the ones this run was generated from.")
+        manifest = parse_manifest((root / "manifest.json").read_text(encoding="utf-8"))
+        self.pending = {"id": summary["run_id"], "root": root, "project": root / "project", "config": config,
+                        "bundle": bundle, "normalized": normalize_inputs(bundle),
+                        "repairs": summary.get("repairs_used", 0), "requests": summary.get("requests", []),
+                        "started": summary.get("started_at"), "manifest": manifest,
+                        "manual_adjustments": summary.get("manual_adjustments", [])}
+        self.assert_unchanged()
+        self.log(f"Loaded run {summary['run_id']} · saved status {summary['status']}")
+        if summary["status"] == "tests_passed":
+            return {**summary, "run_dir": root, "project_dir": root / "project"}
+        # Anything else (stopped, failed, patched) is re-validated after a fresh review.
+        return self._summary("review_required", static_validate(self.pending["project"]))
+
     def verify(self, review_findings: list[str] | None = None) -> dict:
         """Called after the human reviews source; changed repairs need review again."""
         if not self.pending or "manifest" not in self.pending:
