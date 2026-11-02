@@ -47,7 +47,10 @@ manual deletion) and never delete files yourself.
 Known pitfalls from earlier runs - avoid all of them:
 - Tk colours must be '#rrggbb' hex or plain Tk names ('white', 'silver'); never '#silver'.
 - Every Question in code AND tests uses a valid fraction answer such as '3/4' that is
-  one of its options; never placeholders like 'a'.
+  one of its options; never placeholders like 'a'. Every answer AND option must parse
+  with fractions.Fraction: write '7/2' not '3 1/2'; no '<', '>', '=', words or units.
+  Ask comparison questions as "Which is larger?" with fraction options.
+- qid is any non-empty string ('a', 'Q1'); never require it to be numeric.
 - Tests must match this exact implementation: a salted hash differs per call, so test
   verify_password, not equal hashes. No test may depend on random order or timing.
 - Main window must open without error when run as python main.py: every widget option,
