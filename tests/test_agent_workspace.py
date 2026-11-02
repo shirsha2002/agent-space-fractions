@@ -380,3 +380,15 @@ class RepairPromptTests(unittest.TestCase):
         content = repair_messages(manifest, failure, GAME_CONTRACT)[-1]["content"]
         self.assertIn("self.assertFalse(game.submit(\"2/3\"))", content)
         self.assertNotIn("independent_fraction_rules.py, read-only", repair_messages(manifest, "SyntaxError")[-1]["content"])
+
+
+class StartupDialogTests(unittest.TestCase):
+    def test_first_run_modal_dialog_is_not_reported_as_a_hang(self):
+        with TemporaryDirectory() as folder:
+            root = Path(folder) / "project"
+            root.mkdir()
+            (root / "main.py").write_text(
+                "import tkinter as tk\nfrom tkinter import simpledialog, messagebox\n"
+                "root = tk.Tk()\nname = simpledialog.askstring('Setup', 'Admin name:', parent=root)\n"
+                "messagebox.showinfo('Done', 'ok')\nroot.mainloop()\n", encoding="utf-8")
+            self.assertTrue(startup_check(root)["ok"])

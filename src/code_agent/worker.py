@@ -66,11 +66,27 @@ def run(project: str, mode: str, report: str, contract: bool = True) -> int:
                     widget.after(SMOKE_SECONDS * 1000, widget.destroy)
                     original(widget, n)
 
+                # First-run modal dialogs (e.g. admin setup) are normal, not a hang: close them too.
+                original_wait = tkinter.Misc.wait_window
+
+                def closing_wait(widget, window=None):
+                    target = widget if window is None else window
+                    widget.after(SMOKE_SECONDS * 1000, target.destroy)
+                    original_wait(widget, window)
+
+                boxes = {name: getattr(tkinter.messagebox, name) for name in
+                         ("showinfo", "showwarning", "showerror", "askyesno", "askokcancel", "askquestion")}
                 tkinter.Misc.mainloop = closing_mainloop
+                tkinter.Misc.wait_window = closing_wait
+                for name in boxes:
+                    setattr(tkinter.messagebox, name, lambda *args, **kwargs: None)
                 try:
                     runpy.run_path(str(root / "main.py"), run_name="__main__")
                 finally:
                     tkinter.Misc.mainloop = original
+                    tkinter.Misc.wait_window = original_wait
+                    for name, function in boxes.items():
+                        setattr(tkinter.messagebox, name, function)
                 result["ok"] = True
             elif mode == "test":
                 loader = unittest.TestLoader()
