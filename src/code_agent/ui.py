@@ -12,7 +12,7 @@ from tkinter import filedialog, messagebox, ttk
 
 from .agent import MAX_REPAIRS, CodeAgent, RunConfig
 from .budget import BudgetLedger
-from .model_client import DeepSeekClient, ModelError
+from .model_client import DeepSeekClient
 from .offline import OfflineClient
 from .validator import launch_project
 
@@ -151,8 +151,6 @@ class AgentWindow:
         self.open_btn.pack(side="right")
         self.launch_btn = ttk.Button(footer, text="Launch output", state="disabled", command=self._launch)
         self.launch_btn.pack(side="right", padx=8)
-        self.load_btn = ttk.Button(footer, text="Load run", command=self._load)
-        self.load_btn.pack(side="right")
         self._mode()
 
     def _field(self, parent, label, variable, kind):
@@ -193,7 +191,7 @@ class AgentWindow:
 
     def _set_busy(self, busy):
         self.busy = busy
-        for item in [self.start_btn, self.load_btn, self.offline_radio, self.live_radio, self.token_spin,
+        for item in [self.start_btn, self.offline_radio, self.live_radio, self.token_spin,
                      self.repair_spin, *self.entries, *self.browse_buttons]:
             item.configure(state="disabled" if busy else "normal")
         self.cancel_btn.configure(state="normal" if busy else "disabled")
@@ -232,22 +230,6 @@ class AgentWindow:
             self._background(lambda: self.agent.run(config))
         except (ValueError, RuntimeError) as exc:
             messagebox.showerror("Run configuration", str(exc))
-
-    def _load(self):
-        folder = filedialog.askdirectory(title="Select a run folder (output/run_/<run id>)", initialdir=self.output.get())
-        if not folder:
-            return
-        try:
-            # Repairs of a loaded run need the key; loading and validating alone do not.
-            client = DeepSeekClient(self.key.get(), self.ledger) if self.key.get().strip() else _NoKeyClient()
-            config = RunConfig(Path(self.architecture.get()), Path(self.views.get()), Path(self.output.get()),
-                               offline=False, max_tokens=int(self.tokens.get()), max_repairs=int(self.repairs.get()))
-            self.agent = CodeAgent(client, self.ledger, log=lambda message: self.events.put(("log", message)), cancel_event=self.cancel)
-            self.reviewed.set(False)
-            self.status.set("Loading saved run")
-            self._background(lambda: self.agent.load_run(Path(folder), config))
-        except (ValueError, RuntimeError) as exc:
-            messagebox.showerror("Load run", str(exc))
 
     def _check_access(self):
         try:
@@ -324,11 +306,6 @@ class AgentWindow:
         else:
             self.key.set("")
             self.root.destroy()
-
-
-class _NoKeyClient:
-    def complete(self, *args, **kwargs):
-        raise ModelError("Enter the API key before a repair request.")
 
 
 def main():

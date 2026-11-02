@@ -50,6 +50,10 @@ Known pitfalls from earlier runs - avoid all of them:
   one of its options; never placeholders like 'a'. Every answer AND option must parse
   with fractions.Fraction: write '7/2' not '3 1/2'; no '<', '>', '=', words or units.
   Ask comparison questions as "Which is larger?" with fraction options.
+- Options use digits only: '3/6', never Roman numerals such as 'III/6'.
+- Open every sqlite3 connection so it is CLOSED after use (contextlib.closing or an
+  explicit close); sqlite3's own "with" only commits, and Windows then cannot delete
+  the temporary test database.
 - qid is any non-empty string ('a', 'Q1'); never require it to be numeric.
 - Tests must match this exact implementation: a salted hash differs per call, so test
   verify_password, not equal hashes. No test may depend on random order or timing.
