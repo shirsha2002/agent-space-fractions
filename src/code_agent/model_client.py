@@ -54,11 +54,11 @@ class DeepSeekClient:
     the bounded socket timeout. No background automatic retry is performed.
     """
 
-    def __init__(self, api_key: str, ledger: BudgetLedger, timeout: float = 120, opener=None):
+    def __init__(self, api_key: str, ledger: BudgetLedger, timeout: float = 300, opener=None):
         if not isinstance(api_key, str) or not api_key.strip() or any(c.isspace() for c in api_key.strip()):
             raise ModelError("Enter a valid API key in the masked local field.")
-        if not 1 <= timeout <= 120:
-            raise ModelError("Request timeout must be between 1 and 120 seconds.")
+        if not 1 <= timeout <= 600:
+            raise ModelError("Request timeout must be between 1 and 600 seconds.")
         self._api_key = api_key.strip()
         self.ledger = ledger
         self.timeout = timeout
