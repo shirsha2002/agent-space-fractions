@@ -31,6 +31,9 @@ import random  # noqa: F401
 from .contracts import GAME_CONTRACT
 
 
+SMOKE_SECONDS = 2
+
+
 class BoundedOutput(io.TextIOBase):
     def __init__(self):
         self.tail = ""
@@ -54,6 +57,20 @@ def run(project: str, mode: str, report: str, contract: bool = True) -> int:
         with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
             if mode == "run":
                 runpy.run_path(str(root / "main.py"), run_name="__main__")
+                result["ok"] = True
+            elif mode == "smoke":
+                # Startup check: run main.py as a user would, then close the window automatically.
+                original = tkinter.Misc.mainloop
+
+                def closing_mainloop(widget, n=0):
+                    widget.after(SMOKE_SECONDS * 1000, widget.destroy)
+                    original(widget, n)
+
+                tkinter.Misc.mainloop = closing_mainloop
+                try:
+                    runpy.run_path(str(root / "main.py"), run_name="__main__")
+                finally:
+                    tkinter.Misc.mainloop = original
                 result["ok"] = True
             elif mode == "test":
                 loader = unittest.TestLoader()

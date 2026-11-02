@@ -18,7 +18,7 @@ from code_agent.agent import CodeAgent, RunConfig
 from code_agent.budget import BudgetLedger
 from code_agent.model_client import DeepSeekClient
 from code_agent.offline import OfflineClient, OfflineResult
-from code_agent.validator import clean_environment, run_tests, static_validate
+from code_agent.validator import clean_environment, run_tests, startup_check, static_validate
 from code_agent.workspace_tools import ManifestError, ensure_regular_tree, materialize, parse_manifest, safe_path
 
 
@@ -345,3 +345,27 @@ class AgentLoopTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StartupCheckTests(unittest.TestCase):
+    """Logic tests never open the GUI; the startup check must catch launch crashes."""
+
+    def project(self, folder, main):
+        root = Path(folder) / "project"
+        root.mkdir()
+        (root / "main.py").write_text(main, encoding="utf-8")
+        return root
+
+    def test_window_that_crashes_on_launch_fails_with_traceback(self):
+        with TemporaryDirectory() as folder:
+            root = self.project(folder, "import tkinter as tk\nroot = tk.Tk()\n"
+                                        "tk.Canvas(root).create_oval(0, 0, 9, 9, fill='#silver')\nroot.mainloop()\n")
+            result = startup_check(root)
+            self.assertFalse(result["ok"])
+            self.assertIn("invalid color name", result["output"])
+
+    def test_normal_window_opens_and_closes_by_itself(self):
+        with TemporaryDirectory() as folder:
+            root = self.project(folder, "import tkinter as tk\nroot = tk.Tk()\n"
+                                        "tk.Label(root, text='ok').pack()\nroot.mainloop()\n")
+            self.assertTrue(startup_check(root)["ok"])

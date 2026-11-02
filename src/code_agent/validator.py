@@ -112,14 +112,25 @@ def clean_environment() -> dict:
 
 def run_tests(project: Path, cancel_event: threading.Event | None = None,
               *, timeout: float = 30, contract: bool = True) -> dict:
+    return _run_worker(project, "test", cancel_event, timeout=timeout, contract=contract)
+
+
+def startup_check(project: Path, cancel_event: threading.Event | None = None, *, timeout: float = 20) -> dict:
+    """Open the generated app briefly; logic tests never construct the GUI."""
+    return _run_worker(project, "smoke", cancel_event, timeout=timeout, contract=False)
+
+
+def _run_worker(project: Path, mode: str, cancel_event: threading.Event | None,
+                *, timeout: float, contract: bool) -> dict:
+    phase = "tests" if mode == "test" else "startup"
     if cancel_event and cancel_event.is_set():
-        return {"ok": False, "phase": "tests", "errors": ["Cancelled before test execution"]}
+        return {"ok": False, "phase": phase, "errors": ["Cancelled before execution"]}
     if not isinstance(timeout, (int, float)) or not 0 < timeout <= 300:
-        return {"ok": False, "phase": "tests", "errors": ["Invalid test timeout"]}
+        return {"ok": False, "phase": phase, "errors": ["Invalid timeout"]}
     ensure_regular_tree(project)
     with tempfile.TemporaryDirectory(prefix="code-agent-check-") as tmp:
         report = Path(tmp) / "result.json"
-        process = subprocess.Popen(worker_command(project, "test", report, contract=contract),
+        process = subprocess.Popen(worker_command(project, mode, report, contract=contract),
                                    cwd=project, env=clean_environment(), stdin=subprocess.DEVNULL,
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
@@ -128,23 +139,24 @@ def run_tests(project: Path, cancel_event: threading.Event | None = None,
             if (cancel_event and cancel_event.is_set()) or time.monotonic() - began > timeout:
                 process.kill()
                 process.wait(timeout=5)
-                return {"ok": False, "phase": "tests", "errors": [
-                    "Cancelled" if cancel_event and cancel_event.is_set() else "Test execution timed out"]}
+                return {"ok": False, "phase": phase, "errors": [
+                    "Cancelled" if cancel_event and cancel_event.is_set() else
+                    ("Test execution timed out" if mode == "test" else "App did not close after startup (blocked or hung)")]}
             time.sleep(.05)
         if not report.exists() or report.stat().st_size > 100_000:
-            return {"ok": False, "phase": "tests", "errors": ["Worker returned no valid bounded report"]}
+            return {"ok": False, "phase": phase, "errors": ["Worker returned no valid bounded report"]}
         try:
             result = json.loads(report.read_text(encoding="utf-8"))
             if (not isinstance(result, dict) or not isinstance(result.get("ok"), bool)
-                    or result.get("phase") != "test" or not isinstance(result.get("errors"), list)
+                    or result.get("phase") != mode or not isinstance(result.get("errors"), list)
                     or not isinstance(result.get("output"), str)
-                    or (result["ok"] and (type(result.get("tests_run")) is not int or result["tests_run"] < 1))):
+                    or (mode == "test" and result["ok"] and (type(result.get("tests_run")) is not int or result["tests_run"] < 1))):
                 raise ValueError("Invalid worker result schema")
             if process.returncode != 0:
                 result["ok"] = False
             return result
         except (ValueError, OSError):
-            return {"ok": False, "phase": "tests", "errors": ["Invalid worker report"]}
+            return {"ok": False, "phase": phase, "errors": ["Invalid worker report"]}
 
 
 def launch_project(project: Path) -> subprocess.Popen:

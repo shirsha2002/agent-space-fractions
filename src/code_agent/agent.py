@@ -13,7 +13,7 @@ from .input_loader import load_inputs
 from .requirements import normalize_inputs
 from .prompts import generation_messages, repair_messages
 from .workspace_tools import parse_manifest, materialize, ensure_regular_tree
-from .validator import static_validate, run_tests
+from .validator import static_validate, run_tests, startup_check
 
 
 @dataclass
@@ -156,6 +156,12 @@ class CodeAgent:
                 return self._summary("validation_failed", check)
             self.log("Running bounded tests in the bundled worker")
             result = run_tests(p["project"], self.cancel_event, contract=not p["config"].offline)
+            if result["ok"] and not p["config"].offline:
+                self.log("Tests passed; opening the generated app briefly to check startup")
+                startup = startup_check(p["project"], self.cancel_event)
+                if not startup["ok"]:
+                    self.log("Startup check failed: the app crashed or hung when opened")
+                    result = {**startup, "tests_run": result.get("tests_run"), "tests_passed_before_startup": True}
             if review_findings:
                 result["tests_ok"] = result["ok"]
                 result["review_findings"] = review_findings
