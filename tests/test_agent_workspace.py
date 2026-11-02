@@ -323,7 +323,9 @@ class AgentLoopTests(unittest.TestCase):
         self.assertEqual(result["status"], "failed")
         evidence = "\n".join(path.read_text(encoding="utf8") for path in result["run_dir"].rglob("*.json"))
         self.assertNotIn(secret, evidence + str(messages) + json.dumps(ledger.export()))
-        self.assertTrue(ledger.snapshot()["uncertain"])
+        # A rejected key is refused before generation: no lock-up and nothing reserved.
+        self.assertFalse(ledger.snapshot()["uncertain"])
+        self.assertEqual(ledger.snapshot()["reserved_usd"], "0")
 
     def test_budget_preflight_stops_generation_before_any_mock_http_request(self):
         class NeverOpen:

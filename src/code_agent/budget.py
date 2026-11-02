@@ -51,6 +51,10 @@ class Pricing:
         return rates
 
 
+# DeepSeek refuses these before running the model, so no tokens are charged.
+UNBILLED_REJECTIONS = frozenset({401, 402, 403, 429})
+
+
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -229,6 +233,14 @@ class BudgetLedger:
         reason = reason if reason in allowed else "transport_or_response_failure"
         with self._connection() as db:
             db.execute("UPDATE requests SET status='uncertain',updated_at=?,note=? WHERE id=? AND status='reserved'", (_now(), reason, reservation_id))
+
+    def release_rejected(self, reservation_id: str, status_code: int) -> None:
+        """The provider refused the request before generation (auth, balance, access, rate limit): no tokens billed."""
+        if status_code not in UNBILLED_REJECTIONS:
+            raise ValueError("Only pre-generation rejections can release a reservation.")
+        with self._connection() as db:
+            db.execute("UPDATE requests SET status='rejected',updated_at=?,note=? WHERE id=? AND status='reserved'",
+                       (_now(), f"http_{status_code}_rejected_unbilled", reservation_id))
 
     def release_unsubmitted(self, reservation_id: str) -> None:
         """Only use when no network request was attempted (for example pre-send cancellation)."""

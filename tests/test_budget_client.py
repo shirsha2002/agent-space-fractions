@@ -156,6 +156,7 @@ class ClientTests(unittest.TestCase):
 
     def test_auth_rate_limit_and_server_errors_are_sanitized_no_retries(self):
         for status in (401, 402, 403, 429, 500):
+            unbilled = status != 500
             with self.subTest(status=status):
                 with TemporaryDirectory() as folder:
                     ledger = BudgetLedger(Path(folder) / "ledger.sqlite3")
@@ -165,7 +166,14 @@ class ClientTests(unittest.TestCase):
                         DeepSeekClient(self.secret, ledger, opener=opener).complete(MESSAGES)
                     self.assertNotIn(self.secret, str(caught.exception))
                     self.assertEqual(len(opener.requests), 1)
-                    self.assertTrue(ledger.snapshot()["uncertain"])
+                    snapshot = ledger.snapshot()
+                    self.assertEqual(snapshot["uncertain"], not unbilled)
+                    if unbilled:
+                        self.assertEqual(Decimal(snapshot["reserved_usd"]), 0)
+                        self.assertEqual(Decimal(snapshot["spent_usd"]), 0)
+                        # A corrected key can be retried immediately after a pre-generation refusal.
+                        DeepSeekClient(self.secret, ledger, opener=FakeOpener()).complete(MESSAGES)
+                        self.assertGreater(Decimal(ledger.snapshot()["spent_usd"]), 0)
 
     def test_network_failure_retains_reservation_and_no_retry(self):
         opener = FakeOpener(error=urllib.error.URLError(self.secret))

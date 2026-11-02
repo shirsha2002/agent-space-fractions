@@ -11,7 +11,7 @@ from typing import Any
 import urllib.error
 import urllib.request
 
-from .budget import BudgetError, BudgetLedger, MODEL, conservative_input_bound, normalize_usage
+from .budget import UNBILLED_REJECTIONS, BudgetError, BudgetLedger, MODEL, conservative_input_bound, normalize_usage
 
 
 API_URL = "https://api.deepseek.com/chat/completions"
@@ -115,7 +115,10 @@ class DeepSeekClient:
             with self._request(API_URL, payload) as response:
                 data = self._read_json(response)
         except urllib.error.HTTPError as exc:
-            self.ledger.mark_uncertain(reservation, "http_rejection")
+            if exc.code in UNBILLED_REJECTIONS:
+                self.ledger.release_rejected(reservation, exc.code)
+            else:
+                self.ledger.mark_uncertain(reservation, "http_rejection")
             messages_by_status = {
                 400: "The official API rejected the request parameters.",
                 401: "The official API rejected the API key.",
@@ -125,6 +128,8 @@ class DeepSeekClient:
                 429: "The official API rate limit was reached.",
             }
             message = messages_by_status.get(exc.code, "The official API returned a server error.")
+            if exc.code in UNBILLED_REJECTIONS:
+                raise ModelError(message + " The request was refused before generation, so its reservation was released.") from None
             raise ModelError(message + " Billing is unresolved; automatic retries are blocked.") from None
         except (urllib.error.URLError, TimeoutError, socket.timeout, OSError):
             self.ledger.mark_uncertain(reservation)
