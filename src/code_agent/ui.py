@@ -177,9 +177,11 @@ class AgentWindow:
             control.configure(state="normal" if live else "disabled")
 
     def _budget(self):
-        value = self.ledger.snapshot()
-        tokens = value["tokens"]["total_tokens"]
-        self.budget_text.set(f"Estimate ${float(value['spent_usd']):.4f} / $1  ·  Reserved ${float(value['reserved_usd']):.4f}  ·  {tokens:,} tokens")
+        overall = self.ledger.snapshot()
+        latest = self.ledger.latest_run_id()
+        run = self.ledger.snapshot(latest) if latest else overall
+        self.budget_text.set(f"This run ${float(run['spent_usd']):.4f} / $1  ·  Reserved ${float(run['reserved_usd']):.4f}"
+                             f"  ·  All runs ${float(overall['spent_usd']):.4f}  ·  {overall['tokens']['total_tokens']:,} tokens")
 
     def _log(self, text):
         self.logs.configure(state="normal")

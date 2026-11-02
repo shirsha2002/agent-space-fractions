@@ -178,9 +178,11 @@ class BudgetLedger:
             db.close()
 
     @staticmethod
-    def _totals(db) -> dict[str, Any]:
+    def _totals(db, run_id: str | None = None) -> dict[str, Any]:
         cap = Decimal(db.execute("SELECT value FROM settings WHERE name='cap_usd'").fetchone()[0])
         rows = db.execute("SELECT * FROM requests ORDER BY created_at,id").fetchall()
+        if run_id is not None:
+            rows = [r for r in rows if r["run_id"] == run_id]
         spent = sum((Decimal(r["estimated_charge_usd"] or "0") for r in rows), Decimal(0))
         reserved = sum((Decimal(r["reserved_usd"]) for r in rows if r["status"] in {"reserved", "uncertain"}), Decimal(0))
         tokens = {k: 0 for k in ("prompt_tokens", "completion_tokens", "prompt_cache_hit_tokens", "prompt_cache_miss_tokens", "reasoning_tokens", "total_tokens")}
@@ -195,9 +197,15 @@ class BudgetLedger:
                 "request_count": len(rows), "tokens": tokens,
                 "cost_basis": "Application estimate at published peak/off-peak USD rates (reservations at peak); not a provider bill."}
 
-    def snapshot(self) -> dict[str, Any]:
+    def snapshot(self, run_id: str | None = None) -> dict[str, Any]:
+        """All runs by default; with run_id, only that run (the cap applies per run)."""
         with self._connection() as db:
-            return self._totals(db)
+            return self._totals(db, run_id)
+
+    def latest_run_id(self) -> str | None:
+        with self._connection() as db:
+            row = db.execute("SELECT run_id FROM requests ORDER BY created_at DESC LIMIT 1").fetchone()
+            return row[0] if row else None
 
     totals = snapshot
 
@@ -217,8 +225,9 @@ class BudgetLedger:
             totals = self._totals(db)
             if totals["pending"] or totals["uncertain"]:
                 raise BudgetError("A previous request is pending or has uncertain billing. Reconcile it before another paid call.")
-            if reservation > Decimal(totals["remaining_usd"]):
-                raise BudgetError("The conservative request reservation exceeds the remaining USD 1 assignment budget.")
+            # The USD cap applies to each run; earlier runs stay recorded in the ledger.
+            if reservation > Decimal(self._totals(db, run_id)["remaining_usd"]):
+                raise BudgetError("The conservative request reservation exceeds this run's remaining USD 1 budget.")
             db.execute("""INSERT INTO requests (id,run_id,created_at,updated_at,model,status,
                 reserved_usd,input_bound,max_tokens,pricing_json) VALUES (?,?,?,?,?,'reserved',?,?,?,?)""",
                 (ident, run_id, timestamp, timestamp, MODEL, str(reservation), bound, max_tokens, json.dumps(asdict(self.pricing))))

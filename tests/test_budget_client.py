@@ -241,3 +241,19 @@ class PeakPricingTests(unittest.TestCase):
         self.assertEqual(time_factor("2026-11-02T12:45:00+00:00"), Decimal("0.5"))  # Monday 12:45 UTC
         self.assertEqual(time_factor("2026-11-01T07:00:00+00:00"), Decimal("0.5"))  # Sunday
         self.assertEqual(time_factor("not a time"), 1)                      # unknown: assume peak
+
+
+class PerRunCapTests(unittest.TestCase):
+    def test_each_run_has_its_own_cap_and_history_is_kept(self):
+        with TemporaryDirectory() as folder:
+            ledger = BudgetLedger(Path(folder) / "ledger.sqlite3", cap_usd=".01")
+            ledger.settle(ledger.reserve("run-1", MESSAGES, 300), USAGE)
+            first = Decimal(ledger.snapshot("run-1")["spent_usd"])
+            # Spending enough in run-1 to block it must not block a fresh run-2.
+            with self.assertRaises(BudgetError):
+                for _ in range(100):
+                    ledger.settle(ledger.reserve("run-1", MESSAGES, 300), USAGE)
+            ledger.settle(ledger.reserve("run-2", MESSAGES, 300), USAGE)
+            self.assertEqual(Decimal(ledger.snapshot("run-2")["spent_usd"]), first)
+            self.assertGreater(Decimal(ledger.snapshot()["spent_usd"]), Decimal(ledger.snapshot("run-1")["spent_usd"]))
+            self.assertEqual(ledger.latest_run_id(), "run-2")
